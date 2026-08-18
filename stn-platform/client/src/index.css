@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: #f0f4f8;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-stn-primary text-white px-4 py-2 rounded-lg hover:bg-stn-dark transition-colors font-medium text-sm;
+  }
+  .btn-danger {
+    @apply bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm;
+  }
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm;
+  }
+  .input-field {
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-stn-secondary text-sm;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+  .table-header {
+    @apply px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50;
+  }
+  .table-cell {
+    @apply px-4 py-3 text-sm text-gray-700 whitespace-nowrap;
+  }
+  .badge {
+    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full;
+  }
+}
