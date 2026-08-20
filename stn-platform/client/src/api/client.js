@@ -80,6 +80,14 @@ export const api = {
     remove: (id) => request(`/purchase-orders/${id}`, { method: 'DELETE' }),
     nextNumber: () => request('/purchase-orders/next-number')
   },
+  receptionOrders: {
+    list: () => request('/reception-orders'),
+    get: (id) => request(`/reception-orders/${id}`),
+    create: (data) => request('/reception-orders', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(`/reception-orders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    remove: (id) => request(`/reception-orders/${id}`, { method: 'DELETE' }),
+    nextNumber: () => request('/reception-orders/next-number')
+  },
   sections: {
     list: () => request('/sections'),
     create: (data) => request('/sections', { method: 'POST', body: JSON.stringify(data) }),

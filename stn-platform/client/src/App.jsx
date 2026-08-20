@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, ShoppingCart, Truck, Package, Building2, DollarSign, BarChart3, LogOut, User as UserIcon, Cog, Tag } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Truck, Package, Building2, DollarSign, BarChart3, LogOut, User as UserIcon, Cog, Tag, Inbox } from 'lucide-react';
 import { api } from './api/client.js';
 import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import PurchaseOrders from './components/PurchaseOrders.jsx';
+import ReceptionOrders from './components/ReceptionOrders.jsx';
 import Suppliers from './components/Suppliers.jsx';
 import Families from './components/Families.jsx';
 import Stocks from './components/Stocks.jsx';
@@ -19,6 +20,7 @@ const navSections = [
     title: 'Principal', items: [
       { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
       { id: 'purchase-orders', label: 'Bons de Commande', icon: ShoppingCart },
+      { id: 'reception-orders', label: 'Bons de Réception', icon: Inbox },
       { id: 'suppliers', label: 'Fournisseurs', icon: Truck },
       { id: 'families', label: 'Familles des Articles', icon: Tag },
       { id: 'stocks', label: 'Stocks', icon: Package },
@@ -80,6 +82,7 @@ export default function App() {
     switch (activePage) {
       case 'dashboard': return <Dashboard />;
       case 'purchase-orders': return <PurchaseOrders />;
+      case 'reception-orders': return <ReceptionOrders />;
       case 'families': return <Families />;
       case 'suppliers': return <Suppliers />;
       case 'stocks': return <Stocks />;

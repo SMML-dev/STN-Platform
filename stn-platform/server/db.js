@@ -310,4 +310,31 @@ if (!purchaseOrderCols2.includes('signature')) {
   console.log('Migration: colonne signature ajoutee a purchase_orders.');
 }
 
+// Migration: creation de la table reception_orders
+const receptionOrderCols = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reception_orders'").all();
+if (receptionOrderCols.length === 0) {
+  db.exec(`
+    CREATE TABLE reception_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_number TEXT NOT NULL UNIQUE,
+      order_date DATE NOT NULL,
+      supplier TEXT NOT NULL,
+      section TEXT,
+      notes TEXT,
+      signature TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE reception_order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      designation TEXT NOT NULL,
+      quantite INTEGER DEFAULT 1,
+      unite TEXT,
+      FOREIGN KEY (order_id) REFERENCES reception_orders(id) ON DELETE CASCADE
+    );
+  `);
+  console.log('Migration: tables reception_orders et reception_order_items creees.');
+}
+
 module.exports = db;
