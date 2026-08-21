@@ -11,6 +11,7 @@ const emptyForm = {
   order_date: new Date().toISOString().split('T')[0],
   supplier: '',
   section: '',
+  tva_applicable: 0,
   notes: '',
   signature: '',
   items: [{ designation: '', quantite: 1, unite: '' }]
@@ -70,6 +71,7 @@ export default function ReceptionOrders() {
       order_date: item.order_date,
       supplier: item.supplier,
       section: item.section || '',
+      tva_applicable: item.tva_applicable ? 1 : 0,
       notes: item.notes || '',
       signature: item.signature || '',
       items: item.items && item.items.length > 0
@@ -84,6 +86,7 @@ export default function ReceptionOrders() {
     if (!form.supplier.trim()) return;
     const data = {
       ...form,
+      tva_applicable: form.tva_applicable ? 1 : 0,
       signature: form.signature || '',
       items: form.items.filter(i => i.designation.trim())
     };
@@ -203,6 +206,7 @@ export default function ReceptionOrders() {
           ${itemsRows}
         </tbody>
       </table>
+      ${o.tva_applicable ? '<p style="font-weight:bold;margin-top:10px;color:#b85c14">TVA appliquée (18%)</p>' : ''}
       <div class="signatures" style="justify-content: ${o.signature ? 'space-between' : 'flex-end'}">
         ${o.signature ? `
         <div style="text-align:center">
@@ -341,6 +345,17 @@ export default function ReceptionOrders() {
                 <Plus size={14} /> Ajouter
               </button>
             </div>
+          </div>
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.tva_applicable === 1}
+                onChange={e => setForm({ ...form, tva_applicable: e.target.checked ? 1 : 0 })}
+                className="w-4 h-4"
+              />
+              TVA appliquée
+            </label>
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Signature supplémentaire</label>

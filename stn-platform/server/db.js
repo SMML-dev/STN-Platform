@@ -337,4 +337,13 @@ if (receptionOrderCols.length === 0) {
   console.log('Migration: tables reception_orders et reception_order_items creees.');
 }
 
+// Migration: ajout de tva_applicable a la table reception_orders
+const receptionOrderCols2 = db.prepare("PRAGMA table_info(reception_orders)").all().map(c => c.name);
+if (!receptionOrderCols2.includes('tva_applicable')) {
+  db.exec(`
+    ALTER TABLE reception_orders ADD COLUMN tva_applicable INTEGER DEFAULT 0;
+  `);
+  console.log('Migration: colonne tva_applicable ajoutee a reception_orders.');
+}
+
 module.exports = db;

@@ -28,13 +28,13 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { order_number, order_date, supplier, section, notes, items, signature } = req.body;
+  const { order_number, order_date, supplier, section, tva_applicable, notes, items, signature } = req.body;
   const finalNumber = order_number && order_number.trim() ? order_number : generateOrderNumber();
-  const insertOrder = db.prepare('INSERT INTO reception_orders (order_number, order_date, supplier, section, notes, signature) VALUES (?, ?, ?, ?, ?, ?)');
+  const insertOrder = db.prepare('INSERT INTO reception_orders (order_number, order_date, supplier, section, tva_applicable, notes, signature) VALUES (?, ?, ?, ?, ?, ?, ?)');
   const insertItem = db.prepare('INSERT INTO reception_order_items (order_id, designation, quantite, unite) VALUES (?, ?, ?, ?)');
 
   const txn = db.transaction(() => {
-    const info = insertOrder.run(finalNumber, order_date, supplier, section || '', notes || '', signature || '');
+    const info = insertOrder.run(finalNumber, order_date, supplier, section || '', tva_applicable ? 1 : 0, notes || '', signature || '');
     const orderId = info.lastInsertRowid;
     (items || []).forEach(item => {
       insertItem.run(orderId, item.designation, item.quantite || 1, item.unite || '');
@@ -47,13 +47,13 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  const { order_number, order_date, supplier, section, notes, items, signature } = req.body;
-  const updateOrder = db.prepare('UPDATE reception_orders SET order_number = ?, order_date = ?, supplier = ?, section = ?, notes = ?, signature = ? WHERE id = ?');
+  const { order_number, order_date, supplier, section, tva_applicable, notes, items, signature } = req.body;
+  const updateOrder = db.prepare('UPDATE reception_orders SET order_number = ?, order_date = ?, supplier = ?, section = ?, tva_applicable = ?, notes = ?, signature = ? WHERE id = ?');
   const deleteItems = db.prepare('DELETE FROM reception_order_items WHERE order_id = ?');
   const insertItem = db.prepare('INSERT INTO reception_order_items (order_id, designation, quantite, unite) VALUES (?, ?, ?, ?)');
 
   const txn = db.transaction(() => {
-    updateOrder.run(order_number, order_date, supplier, section || '', notes || '', signature || '', req.params.id);
+    updateOrder.run(order_number, order_date, supplier, section || '', tva_applicable ? 1 : 0, notes || '', signature || '', req.params.id);
     deleteItems.run(req.params.id);
     (items || []).forEach(item => {
       insertItem.run(req.params.id, item.designation, item.quantite || 1, item.unite || '');
