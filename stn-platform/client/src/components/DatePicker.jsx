@@ -9,13 +9,6 @@ const MONTHS_FR = [
 
 const DAYS_FR = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
 
-/**
- * Composant de sélection de date en français (JJ/MM/AAAA)
- * @param {string} value - Valeur au format ISO YYYY-MM-DD
- * @param {function} onChange - Callback avec la valeur ISO YYYY-MM-DD
- * @param {string} placeholder - Texte indicatif
- * @param {string} className - Classes CSS additionnelles
- */
 export default function DatePicker({
   value = '',
   onChange,
@@ -26,7 +19,6 @@ export default function DatePicker({
   const [textInput, setTextInput] = useState('');
   const containerRef = useRef(null);
 
-  // Parse ISO (YYYY-MM-DD) en Date locale
   const parseISO = (isoStr) => {
     if (!isoStr) return null;
     const parts = isoStr.split('-');
@@ -40,7 +32,6 @@ export default function DatePicker({
 
   const selectedDate = parseISO(value);
 
-  // Année et mois visualisés dans le calendrier
   const [viewYear, setViewYear] = useState(
     selectedDate ? selectedDate.getFullYear() : new Date().getFullYear()
   );
@@ -48,7 +39,6 @@ export default function DatePicker({
     selectedDate ? selectedDate.getMonth() : new Date().getMonth()
   );
 
-  // Synchroniser le champ texte avec la valeur reçue
   useEffect(() => {
     if (value) {
       setTextInput(fmtDate(value));
@@ -62,7 +52,6 @@ export default function DatePicker({
     }
   }, [value]);
 
-  // Fermer le popover si on clique en dehors
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -73,12 +62,10 @@ export default function DatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Gestion de la saisie manuelle (JJ/MM/AAAA)
   const handleTextChange = (e) => {
     let input = e.target.value;
     setTextInput(input);
 
-    // Valider format JJ/MM/AAAA
     const clean = input.trim();
     const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
     const match = clean.match(regex);
@@ -138,7 +125,6 @@ export default function DatePicker({
   // Calcul des jours du mois
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => {
-    // 0 = dimanche -> convertir pour semaine commençant le lundi (0 = lundi, 6 = dimanche)
     const day = new Date(year, month, 1).getDay();
     return day === 0 ? 6 : day - 1;
   };
@@ -193,7 +179,6 @@ export default function DatePicker({
 
       {open && (
         <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-3 w-64 text-sm animate-in fade-in zoom-in-95 duration-100">
-          {/* Entête mois / année avec navigation */}
           <div className="flex items-center justify-between mb-2">
             <button
               type="button"
@@ -216,7 +201,6 @@ export default function DatePicker({
             </button>
           </div>
 
-          {/* En-têtes jours de la semaine (Lundi -> Dimanche) */}
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
             {DAYS_FR.map((d, i) => (
               <span key={i} className="text-[11px] font-medium text-gray-400 py-0.5">
@@ -225,9 +209,7 @@ export default function DatePicker({
             ))}
           </div>
 
-          {/* Grille des jours */}
           <div className="grid grid-cols-7 gap-1 text-center">
-            {/* Jours du mois précédent */}
             {Array.from({ length: firstDay }).map((_, i) => (
               <span
                 key={`prev-${i}`}
@@ -237,7 +219,6 @@ export default function DatePicker({
               </span>
             ))}
 
-            {/* Jours du mois courant */}
             {Array.from({ length: totalDays }).map((_, i) => {
               const day = i + 1;
               const selected = isSelected(day);
@@ -262,7 +243,6 @@ export default function DatePicker({
             })}
           </div>
 
-          {/* Boutons d'action rapides */}
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 text-xs">
             <button
               type="button"

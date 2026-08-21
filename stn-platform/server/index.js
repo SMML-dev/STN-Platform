@@ -52,7 +52,6 @@ function freePort(port) {
       killed = true;
     }
   } catch {
-    // Port libre, rien a faire
   }
   return killed;
 }

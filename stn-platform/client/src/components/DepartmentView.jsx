@@ -5,9 +5,16 @@ import Modal from './Modal.jsx';
 import EtatBadge from './EtatBadge.jsx';
 import ConfirmDialog from './ConfirmDialog.jsx';
 
-const etatOptions = [
-  'en attente', 'validé', 'en cours', 'soldé', 'livré', 'validé et acquis',
-  'en attente de livraison', 'Tarif à renegocier'
+const chargesEtatOptions = [
+  'en attente', 'validé', 'soldé'
+];
+
+const ordersEtatOptions = [
+  'en cours', 'livré', 'en attente de livraison'
+];
+
+const worksEtatOptions = [
+  'en attente', 'en cours', 'validé', 'Tarif à renégocier'
 ];
 
 function ChargesSection({ department }) {
@@ -136,7 +143,7 @@ function ChargesSection({ department }) {
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">État</label>
             <select value={form.etat} onChange={e => setForm({...form, etat: e.target.value})} className="input-field">
-              {etatOptions.map(o => <option key={o} value={o}>{o}</option>)}
+              {chargesEtatOptions.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
         </div>
@@ -276,7 +283,7 @@ function OrdersSection({ department }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">État</label>
             <select value={form.etat} onChange={e => setForm({...form, etat: e.target.value})} className="input-field">
-              {etatOptions.map(o => <option key={o} value={o}>{o}</option>)}
+              {ordersEtatOptions.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
         </div>
@@ -395,7 +402,7 @@ function WorksSection({ department }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">État</label>
             <select value={form.etat} onChange={e => setForm({...form, etat: e.target.value})} className="input-field">
-              {etatOptions.map(o => <option key={o} value={o}>{o}</option>)}
+              {worksEtatOptions.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
         </div>

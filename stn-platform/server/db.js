@@ -236,7 +236,6 @@ if (existingUser && existingUser.password === 'stn2026') {
   db.prepare('UPDATE users SET password = ? WHERE username = ?').run(hashed, 'admin');
 }
 
-// Migration: fusion de purchases.commentaires dans purchases.observation
 const purchasesCols = db.prepare("PRAGMA table_info(purchases)").all().map(c => c.name);
 if (purchasesCols.includes('commentaires')) {
   db.exec(`
@@ -247,10 +246,8 @@ if (purchasesCols.includes('commentaires')) {
     END;
     ALTER TABLE purchases DROP COLUMN commentaires;
   `);
-  console.log('Migration: commentaires fusionnes dans observation (achats).');
 }
 
-// Migration: ancienne table payments (amount/method/note) vers nouveau schema (montant/mode/reference/notes)
 const paymentsCols = db.prepare("PRAGMA table_info(payments)").all().map(c => c.name);
 if (paymentsCols.length > 0 && !paymentsCols.includes('montant')) {
   db.exec(`
@@ -270,16 +267,13 @@ if (paymentsCols.length > 0 && !paymentsCols.includes('montant')) {
     DROP TABLE payments;
     ALTER TABLE payments_new RENAME TO payments;
   `);
-  console.log('Migration de la table payments effectuee.');
 }
 
-// Migration: ajout de family_id à la table purchases
 const purchasesCols2 = db.prepare("PRAGMA table_info(purchases)").all().map(c => c.name);
 if (!purchasesCols2.includes('family_id')) {
   db.exec(`
     ALTER TABLE purchases ADD COLUMN family_id INTEGER;
   `);
-  console.log('Migration: colonne family_id ajoutee a la table purchases.');
 }
 
 const purchaseOrderCols = db.prepare("PRAGMA table_info(purchase_orders)").all().map(c => c.name);
@@ -289,28 +283,22 @@ if (!purchaseOrderCols.includes('premier_acompte')) {
     ALTER TABLE purchase_orders ADD COLUMN acompte_restant REAL DEFAULT 0;
     ALTER TABLE purchase_orders ADD COLUMN acompte_final REAL DEFAULT 0;
   `);
-  console.log('Migration: colonnes acomptes ajoutees a purchase_orders.');
 }
 
-// Migration: ajout de family_id à la table stocks
 const stocksCols = db.prepare("PRAGMA table_info(stocks)").all().map(c => c.name);
 if (!stocksCols.includes('family_id')) {
   db.exec(`
     ALTER TABLE stocks ADD COLUMN family_id INTEGER;
   `);
-  console.log('Migration: colonne family_id ajoutee a la table stocks.');
 }
 
-// Migration: ajout de signature a la table purchase_orders
 const purchaseOrderCols2 = db.prepare("PRAGMA table_info(purchase_orders)").all().map(c => c.name);
 if (!purchaseOrderCols2.includes('signature')) {
   db.exec(`
     ALTER TABLE purchase_orders ADD COLUMN signature TEXT DEFAULT '';
   `);
-  console.log('Migration: colonne signature ajoutee a purchase_orders.');
 }
 
-// Migration: creation de la table reception_orders
 const receptionOrderCols = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reception_orders'").all();
 if (receptionOrderCols.length === 0) {
   db.exec(`
@@ -334,16 +322,13 @@ if (receptionOrderCols.length === 0) {
       FOREIGN KEY (order_id) REFERENCES reception_orders(id) ON DELETE CASCADE
     );
   `);
-  console.log('Migration: tables reception_orders et reception_order_items creees.');
 }
 
-// Migration: ajout de tva_applicable a la table reception_orders
 const receptionOrderCols2 = db.prepare("PRAGMA table_info(reception_orders)").all().map(c => c.name);
 if (!receptionOrderCols2.includes('tva_applicable')) {
   db.exec(`
     ALTER TABLE reception_orders ADD COLUMN tva_applicable INTEGER DEFAULT 0;
   `);
-  console.log('Migration: colonne tva_applicable ajoutee a reception_orders.');
 }
 
 module.exports = db;

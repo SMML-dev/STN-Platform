@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// --- Catégories de fournisseurs ---
 router.get('/categories', (req, res) => {
   try {
     const rows = db.prepare('SELECT * FROM categories ORDER BY name').all();
@@ -33,7 +32,6 @@ router.delete('/categories/:id', (req, res) => {
   }
 });
 
-// --- Fournisseurs ---
 router.get('/', (req, res) => {
   try {
     const rows = db.prepare(`
