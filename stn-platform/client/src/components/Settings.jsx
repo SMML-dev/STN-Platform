@@ -248,6 +248,7 @@ export default function Settings({ user }) {
         open={resetModalOpen}
         onClose={() => !resetLoading && setResetModalOpen(false)}
         title="Confirmation critique de réinitialisation"
+        hideFooter
       >
         <form onSubmit={handleResetPlatform} className="space-y-4">
           <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-3">

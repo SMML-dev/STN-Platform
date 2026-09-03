@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-export default function Modal({ open, onClose, title, children, onSave, saveLabel = 'Enregistrer' }) {
+export default function Modal({ open, onClose, title, children, onSave, saveLabel = 'Enregistrer', hideFooter = false }) {
   if (!open) return null;
 
   return (
@@ -16,12 +16,14 @@ export default function Modal({ open, onClose, title, children, onSave, saveLabe
         <div className="p-6">
           {children}
         </div>
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-          <button onClick={onClose} className="btn-secondary">Annuler</button>
-          {onSave && (
-            <button onClick={onSave} className="btn-primary">{saveLabel}</button>
-          )}
-        </div>
+        {!hideFooter && (
+          <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+            <button onClick={onClose} className="btn-secondary">Annuler</button>
+            {onSave && (
+              <button onClick={onSave} className="btn-primary">{saveLabel}</button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
