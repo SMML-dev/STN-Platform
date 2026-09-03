@@ -31,7 +31,10 @@ function downloadCSV(url) {
     .then(blob => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = url.includes('bilan') ? 'bilan_stn.xlsx' : 'achats_stn.xlsx';
+      let filename = 'achats_stn.xlsx';
+      if (url.includes('bilan')) filename = 'bilan_stn.xlsx';
+      if (url.includes('audit-logs')) filename = `journal_audit_stn_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -195,5 +198,26 @@ export const api = {
   },
   search: {
     global: (q) => request(`/search?q=${encodeURIComponent(q)}`)
+  },
+  users: {
+    list: () => request('/users'),
+    create: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    resetPassword: (id, newPassword) => request(`/users/${id}/reset-password`, { method: 'PUT', body: JSON.stringify({ newPassword }) }),
+    remove: (id) => request(`/users/${id}`, { method: 'DELETE' })
+  },
+  auditLogs: {
+    list: (params = {}) => {
+      const qs = new URLSearchParams(params).toString();
+      return request(`/audit-logs${qs ? `?${qs}` : ''}`);
+    },
+    stats: () => request('/audit-logs/stats'),
+    export: (params = {}) => {
+      const qs = new URLSearchParams(params).toString();
+      return downloadCSV(`/audit-logs/export${qs ? `?${qs}` : ''}`);
+    }
+  },
+  admin: {
+    reset: () => request('/admin/reset', { method: 'POST' })
   }
 };

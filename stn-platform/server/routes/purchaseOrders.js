@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { logAudit } = require('../auditLogger');
 
 function generateOrderNumber() {
   const count = db.prepare("SELECT COUNT(*) as c FROM purchase_orders").get().c;
@@ -51,6 +52,14 @@ router.post('/', (req, res) => {
   });
 
   const id = txn();
+
+  logAudit(req, {
+    action: 'CRÉATION',
+    entity_type: 'Bon de Commande',
+    entity_id: finalNumber,
+    description: `Création du bon de commande N° ${finalNumber} pour le fournisseur "${supplier}"`
+  });
+
   res.json({ id });
 });
 
@@ -71,11 +80,28 @@ router.put('/:id', (req, res) => {
   });
 
   txn();
+
+  logAudit(req, {
+    action: 'MODIFICATION',
+    entity_type: 'Bon de Commande',
+    entity_id: order_number || req.params.id,
+    description: `Mise à jour du bon de commande N° ${order_number || req.params.id} (${supplier})`
+  });
+
   res.json({ success: true });
 });
 
 router.delete('/:id', (req, res) => {
+  const order = db.prepare('SELECT order_number, supplier FROM purchase_orders WHERE id = ?').get(req.params.id);
   db.prepare('DELETE FROM purchase_orders WHERE id = ?').run(req.params.id);
+
+  logAudit(req, {
+    action: 'SUPPRESSION',
+    entity_type: 'Bon de Commande',
+    entity_id: order ? order.order_number : req.params.id,
+    description: `Suppression du bon de commande N° ${order ? order.order_number : req.params.id}`
+  });
+
   res.json({ success: true });
 });
 

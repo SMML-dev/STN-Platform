@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, ShoppingCart, Truck, Package, Building2, DollarSign, BarChart3, LogOut, User as UserIcon, Cog, Tag, Inbox } from 'lucide-react';
+import {
+  LayoutDashboard, ShoppingCart, Truck, Package, Building2,
+  DollarSign, BarChart3, LogOut, User as UserIcon, Cog, Tag,
+  Inbox, Users, ShieldAlert
+} from 'lucide-react';
 import { api } from './api/client.js';
 import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
@@ -12,29 +16,10 @@ import Admin from './components/Admin.jsx';
 import Prices from './components/Prices.jsx';
 import Bilan from './components/Bilan.jsx';
 import SettingsPage from './components/Settings.jsx';
+import Employees from './components/Employees.jsx';
+import AuditLogs from './components/AuditLogs.jsx';
 import ConfirmDialog from './components/ConfirmDialog.jsx';
 import GlobalSearch from './components/GlobalSearch.jsx';
-
-const navSections = [
-  {
-    title: 'Principal', items: [
-      { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
-      { id: 'purchase-orders', label: 'Bons de Commande', icon: ShoppingCart },
-      { id: 'reception-orders', label: 'Bons de Réception', icon: Inbox },
-      { id: 'suppliers', label: 'Fournisseurs', icon: Truck },
-      { id: 'families', label: 'Familles des Articles', icon: Tag },
-      { id: 'stocks', label: 'Stocks', icon: Package },
-    ]
-  },
-  {
-    title: 'Gestion', items: [
-      { id: 'prices', label: 'Prix en Temps Réel', icon: DollarSign },
-      { id: 'bilan', label: 'Bilan', icon: BarChart3 },
-      { id: 'admin', label: 'Administration', icon: Building2 },
-      { id: 'settings', label: 'Paramètres', icon: Cog },
-    ]
-  }
-];
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -69,14 +54,55 @@ export default function App() {
   };
 
   if (!authChecked) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <p className="text-gray-400">Chargement...</p>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-gray-400">Chargement...</p>
+      </div>
+    );
   }
 
   if (!user) {
     return <Login onLogin={setUser} />;
   }
+
+  const isAdmin = user?.role === 'admin';
+
+  const navSections = [
+    {
+      title: 'Principal',
+      items: [
+        { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
+        { id: 'purchase-orders', label: 'Bons de Commande', icon: ShoppingCart },
+        { id: 'reception-orders', label: 'Bons de Réception', icon: Inbox },
+        { id: 'suppliers', label: 'Fournisseurs', icon: Truck },
+        { id: 'families', label: 'Familles des Articles', icon: Tag },
+        { id: 'stocks', label: 'Stocks', icon: Package },
+      ]
+    },
+    {
+      title: 'Gestion & Suivi',
+      items: [
+        { id: 'prices', label: 'Prix en Temps Réel', icon: DollarSign },
+        { id: 'bilan', label: 'Bilan Global', icon: BarChart3 },
+        { id: 'admin', label: 'Charges & Bateaux', icon: Building2 },
+      ]
+    },
+    ...(isAdmin ? [
+      {
+        title: 'Administration',
+        items: [
+          { id: 'employees', label: 'Gestion des Employés', icon: Users },
+          { id: 'audit-logs', label: "Journal d'Audit", icon: ShieldAlert },
+        ]
+      }
+    ] : []),
+    {
+      title: 'Configuration',
+      items: [
+        { id: 'settings', label: 'Paramètres', icon: Cog },
+      ]
+    }
+  ];
 
   const renderPage = () => {
     switch (activePage) {
@@ -89,10 +115,14 @@ export default function App() {
       case 'prices': return <Prices />;
       case 'bilan': return <Bilan />;
       case 'admin': return <Admin />;
+      case 'employees': return isAdmin ? <Employees currentUser={user} /> : <Dashboard />;
+      case 'audit-logs': return isAdmin ? <AuditLogs /> : <Dashboard />;
       case 'settings': return <SettingsPage user={user} />;
       default: return <Dashboard />;
     }
   };
+
+  const activeLabel = navSections.flatMap(s => s.items).find(n => n.id === activePage)?.label || 'Tableau de Bord';
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -100,7 +130,12 @@ export default function App() {
         <div className="p-5 border-b border-stn-dark">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 flex items-center justify-center p-1 flex-shrink-0">
-              <img src="/logo.png" alt="Logo STN" className="w-full h-full object-contain" onError={e => { e.target.outerHTML = '<span class="text-stn-primary font-bold text-lg">STN</span>'; }} />
+              <img
+                src="/logo.png"
+                alt="Logo STN"
+                className="w-full h-full object-contain"
+                onError={e => { e.target.outerHTML = '<span class="text-stn-primary font-bold text-lg">STN</span>'; }}
+              />
             </div>
             <div>
               <h1 className="font-bold text-sm leading-tight">STN</h1>
@@ -108,22 +143,27 @@ export default function App() {
             </div>
           </div>
         </div>
+
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navSections.map((section, si) => (
             <div key={si} className="mb-3">
-              <p className="text-xs text-stn-light uppercase tracking-wider px-3 py-1.5 font-semibold opacity-60">{section.title}</p>
+              <p className="text-xs text-stn-light uppercase tracking-wider px-3 py-1.5 font-semibold opacity-60">
+                {section.title}
+              </p>
               <div className="space-y-1">
                 {section.items.map(item => {
                   const Icon = item.icon;
+                  const isActive = activePage === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => setActivePage(item.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activePage === item.id ? 'bg-white text-stn-primary' : 'text-stn-light hover:bg-stn-dark'
-                        }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        isActive ? 'bg-white text-stn-primary shadow-sm font-semibold' : 'text-stn-light hover:bg-stn-dark'
+                      }`}
                     >
                       <Icon size={18} />
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
                     </button>
                   );
                 })}
@@ -131,12 +171,23 @@ export default function App() {
             </div>
           ))}
         </nav>
-        <div className="p-4 border-t border-stn-dark">
-          <div className="flex items-center gap-2 text-xs text-stn-light mb-2">
-            <UserIcon size={14} />
-            <span>{user.display_name || user.username}</span>
+
+        <div className="p-4 border-t border-stn-dark bg-stn-dark/40">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-xs text-stn-light truncate">
+              <UserIcon size={14} className="flex-shrink-0" />
+              <span className="truncate font-medium">{user.display_name || user.username}</span>
+            </div>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase ${
+              isAdmin ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/40' : 'bg-blue-500/30 text-blue-200'
+            }`}>
+              {isAdmin ? 'Admin' : 'Employé'}
+            </span>
           </div>
-          <button onClick={() => setLogoutOpen(true)} className="flex items-center gap-2 text-xs text-stn-light hover:text-white transition-colors">
+          <button
+            onClick={() => setLogoutOpen(true)}
+            className="flex items-center gap-2 text-xs text-stn-light hover:text-white transition-colors w-full py-1"
+          >
             <LogOut size={14} /> Déconnexion
           </button>
         </div>
@@ -145,7 +196,11 @@ export default function App() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-500 hover:text-gray-700">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-gray-500 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              title={sidebarOpen ? 'Masquer la barre latérale' : 'Afficher la barre latérale'}
+            >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -153,7 +208,7 @@ export default function App() {
               </svg>
             </button>
             <h2 className="text-lg font-semibold text-gray-800">
-              {navSections.flatMap(s => s.items).find(n => n.id === activePage)?.label || 'Tableau de Bord'}
+              {activeLabel}
             </h2>
           </div>
           <div className="flex items-center gap-4">
@@ -163,10 +218,12 @@ export default function App() {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">
+
+        <main className="flex-1 overflow-y-auto p-6 bg-[#f8fafc]">
           {renderPage()}
         </main>
       </div>
+
       <ConfirmDialog
         open={logoutOpen}
         title="Déconnexion"
