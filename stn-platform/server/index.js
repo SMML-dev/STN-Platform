@@ -4,11 +4,14 @@ const path = require('path');
 const { execSync } = require('child_process');
 const db = require('./db');
 
+const { extractUser } = require('./authMiddleware');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(extractUser);
 
 app.use('/api/purchases', require('./routes/purchases'));
 app.use('/api/purchase-orders', require('./routes/purchaseOrders'));
@@ -30,6 +33,10 @@ app.use('/api/alerts', require('./routes/alerts'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/search', require('./routes/search'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/audit-logs', require('./routes/auditLogs'));
+app.use('/api/admin', require('./routes/admin'));
+
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 

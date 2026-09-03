@@ -3,7 +3,7 @@ import { Building2, Ship, Anchor } from 'lucide-react';
 import DepartmentView from './DepartmentView.jsx';
 
 const departments = [
-  { id: 'ADMIN', label: 'Administration', icon: Building2 },
+  { id: 'ADMIN', label: 'Charges', icon: Building2 },
   { id: 'GENTLE', label: 'Bateau GENTLE', icon: Ship },
   { id: 'GALLANT', label: 'Bateau GALLANT', icon: Anchor }
 ];
@@ -22,7 +22,9 @@ export default function Admin() {
               <Icon size={28} />
             </div>
             <div>
-              <h2 className="text-xl font-bold">{active.label}</h2>
+              <h2 className="text-xl font-bold">
+                {department === 'ADMIN' ? 'Charges & Bateaux' : active.label}
+              </h2>
               <p className="text-sm text-stn-light">Charges fixes, commandes à prévoir, travaux et réparations</p>
             </div>
           </div>
@@ -33,9 +35,8 @@ export default function Admin() {
                 <button
                   key={d.id}
                   onClick={() => setDepartment(d.id)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
-                    department === d.id ? 'bg-white text-stn-primary' : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
-                  }`}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${department === d.id ? 'bg-white text-stn-primary' : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
+                    }`}
                 >
                   <DIcon size={16} /> {d.label}
                 </button>

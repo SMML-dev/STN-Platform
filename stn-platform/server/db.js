@@ -331,4 +331,40 @@ if (!receptionOrderCols2.includes('tva_applicable')) {
   `);
 }
 
+// Table des logs d'audit (traçabilité complète des actions avec date et heure précises)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    username TEXT NOT NULL,
+    user_role TEXT DEFAULT 'employe',
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    description TEXT NOT NULL,
+    ip_address TEXT,
+    created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+  );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    token TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+`);
+
+const usersCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+if (!usersCols.includes('is_active')) {
+  db.exec(`
+    ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1;
+  `);
+}
+
+// Mise à jour de l'administrateur avec le rôle 'admin'
+db.exec(`
+  UPDATE users SET role = 'admin' WHERE username = 'admin' AND (role = 'manager' OR role IS NULL);
+`);
+
 module.exports = db;
+
