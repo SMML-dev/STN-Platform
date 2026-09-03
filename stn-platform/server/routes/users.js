@@ -77,10 +77,13 @@ router.put('/:id', (req, res) => {
     return res.status(404).json({ error: 'Utilisateur introuvable' });
   }
 
-  // Protéger l'administrateur principal : aucun autre admin ne peut modifier son statut ou son rôle
+  // Protéger l'administrateur principal : aucun autre admin ne peut modifier son profil
   const isPrimaryAdmin = targetUser.username === 'admin';
   if (isPrimaryAdmin && req.user.id !== targetUser.id) {
-    // Seul le compte lui-même peut modifier son propre affichage, mais le statut/rôle est protégé
+    // Bloquer toute tentative de modification du nom affiché
+    if (display_name !== undefined && display_name.trim() !== targetUser.display_name) {
+      return res.status(403).json({ error: "Impossible de modifier le nom de l'administrateur principal. Ce compte est entièrement protégé." });
+    }
     if (is_active !== undefined) {
       return res.status(403).json({ error: "Impossible de modifier le statut de l'administrateur principal. Ce compte est protégé." });
     }

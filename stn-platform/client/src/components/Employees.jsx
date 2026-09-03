@@ -86,11 +86,11 @@ export default function Employees({ currentUser }) {
         role: editUser.role,
         is_active: editUser.is_active
       });
-      showNotification("Informations de l'employe mises a jour.");
+      showNotification("Informations de l'employé mises à jour.");
       setEditUser(null);
       loadEmployees();
     } catch (err) {
-      setError(err.message || 'Erreur lors de la mise a jour');
+      setError(err.message || 'Erreur lors de la mise à jour');
     } finally {
       setSubmitting(false);
     }
@@ -100,17 +100,17 @@ export default function Employees({ currentUser }) {
     e.preventDefault();
     if (!resetPassUser || !newPassword) return;
     if (newPassword.length < 4) {
-      setError('Le mot de passe doit comporter au moins 4 caracteres');
+      setError('Le mot de passe doit comporter au moins 4 caractères');
       return;
     }
     setSubmitting(true);
     try {
       await api.users.resetPassword(resetPassUser.id, newPassword);
-      showNotification(`Mot de passe reinitialise pour "${resetPassUser.display_name || resetPassUser.username}".`);
+      showNotification(`Mot de passe réinitialisé pour "${resetPassUser.display_name || resetPassUser.username}".`);
       setResetPassUser(null);
       setNewPassword('');
     } catch (err) {
-      setError(err.message || 'Erreur lors de la reinitialisation du mot de passe');
+      setError(err.message || 'Erreur lors de la réinitialisation du mot de passe');
     } finally {
       setSubmitting(false);
     }
@@ -120,7 +120,7 @@ export default function Employees({ currentUser }) {
     if (!deleteUser) return;
     try {
       await api.users.remove(deleteUser.id);
-      showNotification(`Employe "${deleteUser.display_name || deleteUser.username}" supprime.`);
+      showNotification(`Employé "${deleteUser.display_name || deleteUser.username}" supprimé.`);
       setDeleteUser(null);
       loadEmployees();
     } catch (err) {
@@ -150,9 +150,9 @@ export default function Employees({ currentUser }) {
               <Users size={28} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Gestion des Employes</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Gestion des Employés</h2>
               <p className="text-sm text-stn-light opacity-90">
-                Creez, administrez les acces et gerez les roles du personnel STN
+                Créez, administrez les accès et gérez les rôles du personnel STN
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function Employees({ currentUser }) {
               className="flex items-center gap-2 bg-white text-stn-primary hover:bg-stn-light px-4 py-2.5 rounded-lg font-semibold text-sm shadow transition-all transform active:scale-95"
             >
               <UserPlus size={18} />
-              Nouvel Employe
+              Nouvel Employé
             </button>
           </div>
         </div>
@@ -235,8 +235,8 @@ export default function Employees({ currentUser }) {
           </div>
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="input-field w-auto min-w-[140px]">
-              <option value="ALL">Tous les roles</option>
-              <option value="employe">Employe</option>
+              <option value="ALL">Tous les rôles</option>
+              <option value="employe">Employé</option>
               <option value="admin">Administrateur</option>
             </select>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input-field w-auto min-w-[140px]">
@@ -254,11 +254,11 @@ export default function Employees({ currentUser }) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50/80">
-                <th className="table-header">Employe</th>
+                <th className="table-header">Employé</th>
                 <th className="table-header">Identifiant</th>
-                <th className="table-header">Role</th>
+                <th className="table-header">Rôle</th>
                 <th className="table-header">Statut</th>
-                <th className="table-header">Cree le</th>
+                <th className="table-header">Créé le</th>
                 <th className="table-header text-right">Actions</th>
               </tr>
             </thead>
@@ -274,7 +274,7 @@ export default function Employees({ currentUser }) {
                 <tr>
                   <td colSpan="6" className="text-center py-12 text-gray-400">
                     <Users size={32} className="mx-auto mb-2 opacity-40" />
-                    Aucun employe trouve selon vos criteres.
+                    Aucun employé trouvé selon vos critères.
                   </td>
                 </tr>
               ) : (
@@ -292,11 +292,10 @@ export default function Employees({ currentUser }) {
                     <tr key={emp.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="table-cell">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
-                            isAdmin
-                              ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300'
-                              : 'bg-blue-100 text-stn-primary'
-                          }`}>
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${isAdmin
+                            ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300'
+                            : 'bg-blue-100 text-stn-primary'
+                            }`}>
                             {emp.display_name ? emp.display_name.slice(0, 2).toUpperCase() : emp.username.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
@@ -331,7 +330,7 @@ export default function Employees({ currentUser }) {
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                             <User size={12} />
-                            Employe
+                            Employé
                           </span>
                         )}
                       </td>
@@ -370,14 +369,14 @@ export default function Employees({ currentUser }) {
                             <button
                               onClick={() => { setError(''); setResetPassUser(emp); setNewPassword(''); }}
                               className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                              title="Reinitialiser le mot de passe"
+                              title="Réinitialiser le mot de passe"
                             >
                               <KeyRound size={16} />
                             </button>
                           ) : (
                             <span
                               className="p-1.5 text-gray-300 cursor-not-allowed rounded-lg inline-flex"
-                              title="Les administrateurs changent leur mot de passe dans Parametres"
+                              title="Les administrateurs changent leur mot de passe dans Paramètres"
                             >
                               <KeyRound size={16} />
                             </span>
@@ -389,8 +388,8 @@ export default function Employees({ currentUser }) {
                               if (!canDelete) {
                                 showNotification(
                                   isPrimaryAdmin
-                                    ? "L'administrateur principal ne peut pas etre supprime."
-                                    : 'Vous ne pouvez pas supprimer votre propre compte.',
+                                    ? "L'administrateur principal ne peut pas être supprimé."
+                                    : "Vous ne pouvez pas supprimer votre propre compte.",
                                   true
                                 );
                                 return;
@@ -398,17 +397,16 @@ export default function Employees({ currentUser }) {
                               setDeleteUser(emp);
                             }}
                             disabled={!canDelete}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              !canDelete
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
-                            }`}
+                            className={`p-1.5 rounded-lg transition-colors ${!canDelete
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                              }`}
                             title={
                               isPrimaryAdmin
-                                ? "L'administrateur principal est protege et ne peut pas etre supprime"
+                                ? "L'administrateur principal est protégé et ne peut pas être supprimé"
                                 : isCurrent
                                   ? 'Impossible de supprimer votre propre compte'
-                                  : 'Supprimer cet employe'
+                                  : 'Supprimer cet employé'
                             }
                           >
                             <Trash2 size={16} />
@@ -425,7 +423,7 @@ export default function Employees({ currentUser }) {
       </div>
 
       {/* Modal: Creer un Nouvel Employe */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Creation d'un Nouvel Employe">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Création d'un Nouvel Employé" hideFooter>
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -437,7 +435,7 @@ export default function Employees({ currentUser }) {
               value={formData.display_name}
               onChange={e => setFormData({ ...formData, display_name: e.target.value })}
               className="input-field"
-              placeholder="ex: Mamadou Diagne"
+              placeholder="Votre nom complet"
             />
           </div>
           <div>
@@ -450,9 +448,9 @@ export default function Employees({ currentUser }) {
               value={formData.username}
               onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
               className="input-field"
-              placeholder="ex: mdiagne"
+              placeholder="Votre nom d'utilisateur"
             />
-            <p className="text-xs text-gray-400 mt-1">Identifiant unique utilise pour se connecter</p>
+            <p className="text-xs text-gray-400 mt-1">Identifiant unique utilisé pour se connecter</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -465,20 +463,20 @@ export default function Employees({ currentUser }) {
               value={formData.password}
               onChange={e => setFormData({ ...formData, password: e.target.value })}
               className="input-field"
-              placeholder="Au moins 4 caracteres"
+              placeholder="Au moins 4 caractères"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role sur la plateforme
+              Rôle sur la plateforme
             </label>
             <select
               value={formData.role}
               onChange={e => setFormData({ ...formData, role: e.target.value })}
               className="input-field"
             >
-              <option value="employe">Employe (Acces standard)</option>
-              <option value="admin">Administrateur (Acces total + Journal d'audit)</option>
+              <option value="employe">Employé (Accès standard)</option>
+              <option value="admin">Administrateur (Accès total + Journal d'audit)</option>
             </select>
           </div>
           {error && (
@@ -489,7 +487,7 @@ export default function Employees({ currentUser }) {
           <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
             <button type="button" onClick={() => setCreateOpen(false)} className="btn-secondary">Annuler</button>
             <button type="submit" disabled={submitting} className="btn-primary flex items-center gap-2">
-              {submitting ? 'Creation en cours...' : "Creer l'employe"}
+              {submitting ? 'Création en cours...' : "Créer l'employé"}
             </button>
           </div>
         </form>
@@ -499,7 +497,8 @@ export default function Employees({ currentUser }) {
       <Modal
         open={!!editUser}
         onClose={() => setEditUser(null)}
-        title={`Modifier l'employe: ${editUser?.username}`}
+        title={`Modifier l'employé: ${editUser?.username}`}
+        hideFooter
       >
         {editUser && (() => {
           const isPrimaryAdmin = editUser.username === 'admin';
@@ -516,7 +515,7 @@ export default function Employees({ currentUser }) {
                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
                   <Lock size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Le compte <strong>Administrateur Principal</strong> est protege. Seul son nom affiche peut etre modifie ici. Son statut, son role et son mot de passe sont verouilles.
+                    Le compte <strong>Administrateur Principal</strong> est entièrement protégé. Son nom, son statut, son rôle et son mot de passe ne peuvent pas être modifiés.
                   </span>
                 </div>
               )}
@@ -525,35 +524,39 @@ export default function Employees({ currentUser }) {
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
                   <Shield size={14} className="text-blue-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Ce compte est un <strong>Administrateur</strong>. La reinitialisation du mot de passe se fait uniquement depuis <strong>Parametres</strong>.
+                    Ce compte est un <strong>Administrateur</strong>. La réinitialisation du mot de passe se fait uniquement depuis <strong>Paramètres</strong>.
                   </span>
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet / Affiche</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet / Affiché</label>
                 <input
                   type="text"
                   required
                   value={editUser.display_name || ''}
+                  disabled={isPrimaryAdmin && !isSelf}
                   onChange={e => setEditUser({ ...editUser, display_name: e.target.value })}
-                  className="input-field"
+                  className="input-field disabled:bg-gray-100"
                 />
+                {isPrimaryAdmin && !isSelf && (
+                  <p className="text-xs text-amber-600 mt-1">Le nom de l'administrateur principal est protégé.</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
                 <select
                   value={editUser.role}
                   disabled={roleLocked}
                   onChange={e => setEditUser({ ...editUser, role: e.target.value })}
                   className="input-field disabled:bg-gray-100"
                 >
-                  <option value="employe">Employe</option>
+                  <option value="employe">Employé</option>
                   <option value="admin">Administrateur</option>
                 </select>
-                {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas modifier votre propre role.</p>}
-                {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le role de l'administrateur principal est protege.</p>}
+                {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>}
+                {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le rôle de l'administrateur principal est protégé.</p>}
               </div>
 
               <div>
@@ -564,11 +567,11 @@ export default function Employees({ currentUser }) {
                   onChange={e => setEditUser({ ...editUser, is_active: parseInt(e.target.value, 10) })}
                   className="input-field disabled:bg-gray-100"
                 >
-                  <option value={1}>Actif (Connexion autorisee)</option>
-                  <option value={0}>Inactif (Connexion bloquee)</option>
+                  <option value={1}>Actif (Connexion autorisée)</option>
+                  <option value={0}>Inactif (Connexion bloquée)</option>
                 </select>
-                {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas desactiver votre propre compte.</p>}
-                {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le statut de l'administrateur principal ne peut pas etre modifie.</p>}
+                {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas désactiver votre propre compte.</p>}
+                {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le statut de l'administrateur principal ne peut pas être modifié.</p>}
               </div>
 
               {error && (
@@ -592,14 +595,15 @@ export default function Employees({ currentUser }) {
       <Modal
         open={!!resetPassUser}
         onClose={() => setResetPassUser(null)}
-        title="Reinitialisation du mot de passe"
+        title="Réinitialisation du mot de passe"
+        hideFooter
       >
         {resetPassUser && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-center gap-2">
               <Lock size={14} className="text-blue-600 flex-shrink-0" />
               <span>
-                Definition d'un nouveau mot de passe pour <strong>{resetPassUser.display_name || resetPassUser.username}</strong> ({resetPassUser.username}).
+                Définition d'un nouveau mot de passe pour <strong>{resetPassUser.display_name || resetPassUser.username}</strong> ({resetPassUser.username}).
               </span>
             </div>
             <div>
@@ -622,7 +626,7 @@ export default function Employees({ currentUser }) {
             <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
               <button type="button" onClick={() => setResetPassUser(null)} className="btn-secondary">Annuler</button>
               <button type="submit" disabled={submitting} className="btn-primary">
-                {submitting ? 'Mise a jour...' : 'Confirmer le mot de passe'}
+                {submitting ? 'Mise à jour...' : 'Confirmer le mot de passe'}
               </button>
             </div>
           </form>
@@ -632,9 +636,9 @@ export default function Employees({ currentUser }) {
       {/* Confirmation Suppression */}
       <ConfirmDialog
         open={!!deleteUser}
-        title="Supprimer l'employe"
-        message={`Voulez-vous vraiment supprimer definitivement le compte de "${deleteUser?.display_name || deleteUser?.username}" ? Cette action est irreversible.`}
-        confirmLabel="Supprimer definitivement"
+        title="Supprimer l'employé"
+        message={`Voulez-vous vraiment supprimer définitivement le compte de "${deleteUser?.display_name || deleteUser?.username}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer définitivement"
         cancelLabel="Annuler"
         onConfirm={handleDelete}
         onCancel={() => setDeleteUser(null)}
