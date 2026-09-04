@@ -283,8 +283,29 @@ export default function Employees({ currentUser }) {
                   // L'admin principal est identifie par son username 'admin' (premier compte cree)
                   const isPrimaryAdmin = emp.username === 'admin';
                   const isAdmin = emp.role === 'admin';
-                  // Les admins changent leur MDP dans Parametres — bouton masque pour eux
-                  const canResetPassword = !isAdmin;
+                  const isRequesterPrimaryAdmin = currentUser && currentUser.username === 'admin';
+
+                  // Réinitialisation MDP :
+                  // - Pour l'admin principal : JAMAIS depuis ici (utilise Paramètres)
+                  // - Pour son propre compte : utilise Paramètres
+                  // - Pour un autre compte admin : SEUL l'administrateur principal peut réinitialiser le MDP
+                  // - Pour un employé : tout admin peut réinitialiser le MDP
+                  const canResetPassword = isPrimaryAdmin
+                    ? false
+                    : isCurrent
+                      ? false
+                      : isAdmin
+                        ? isRequesterPrimaryAdmin
+                        : true;
+
+                  const resetPasswordTooltip = isPrimaryAdmin
+                    ? "L'administrateur principal modifie son mot de passe dans Paramètres"
+                    : isCurrent
+                      ? "Vous devez modifier votre mot de passe dans Paramètres"
+                      : !isRequesterPrimaryAdmin && isAdmin
+                        ? "Seul l'administrateur principal peut réinitialiser le mot de passe d'un administrateur"
+                        : "Réinitialiser le mot de passe";
+
                   // Suppression bloquee : propre compte OU admin principal
                   const canDelete = !isCurrent && !isPrimaryAdmin;
 
@@ -364,7 +385,7 @@ export default function Employees({ currentUser }) {
                             <Edit2 size={16} />
                           </button>
 
-                          {/* Reset MDP : masque pour tous les admins */}
+                          {/* Reset MDP */}
                           {canResetPassword ? (
                             <button
                               onClick={() => { setError(''); setResetPassUser(emp); setNewPassword(''); }}
@@ -376,7 +397,7 @@ export default function Employees({ currentUser }) {
                           ) : (
                             <span
                               className="p-1.5 text-gray-300 cursor-not-allowed rounded-lg inline-flex"
-                              title="Les administrateurs changent leur mot de passe dans Paramètres"
+                              title={resetPasswordTooltip}
                             >
                               <KeyRound size={16} />
                             </span>
@@ -504,10 +525,17 @@ export default function Employees({ currentUser }) {
           const isPrimaryAdmin = editUser.username === 'admin';
           const isAdminTarget = editUser.role === 'admin';
           const isSelf = currentUser && currentUser.id === editUser.id;
-          // Role verouille : propre compte OU admin principal modifie par quelqu'un d'autre
-          const roleLocked = isSelf || (isPrimaryAdmin && !isSelf);
-          // Statut verrouille : propre compte OU admin principal
-          const statusLocked = isSelf || isPrimaryAdmin;
+          const isRequesterPrimaryAdmin = currentUser && currentUser.username === 'admin';
+          // Role verouille :
+          // - Propre compte (on ne peut pas modifier son propre rôle)
+          // - Admin principal (son rôle ne peut jamais être modifié)
+          // - Autre admin : seul l'admin principal a le droit de modifier son rôle
+          const roleLocked = isSelf || isPrimaryAdmin || (isAdminTarget && !isRequesterPrimaryAdmin);
+          // Statut verrouille :
+          // - Propre compte (on ne peut pas se désactiver soi-même)
+          // - Admin principal (son statut ne peut jamais être modifié)
+          // - Autre admin : seul l'admin principal a le droit de modifier son statut
+          const statusLocked = isSelf || isPrimaryAdmin || (isAdminTarget && !isRequesterPrimaryAdmin);
           return (
             <form onSubmit={handleUpdate} className="space-y-4">
               {/* Bandeau de protection pour l'admin principal */}
@@ -524,7 +552,9 @@ export default function Employees({ currentUser }) {
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
                   <Shield size={14} className="text-blue-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Ce compte est un <strong>Administrateur</strong>. La réinitialisation du mot de passe se fait uniquement depuis <strong>Paramètres</strong>.
+                    Ce compte est un <strong>Administrateur</strong>.{!isRequesterPrimaryAdmin
+                      ? " Seul l'administrateur principal peut modifier son rôle, son statut ou réinitialiser son mot de passe."
+                      : " En tant qu'administrateur principal, vous pouvez modifier son rôle, son statut et définir un nouveau mot de passe en cas d'oubli."}
                   </span>
                 </div>
               )}
@@ -557,6 +587,9 @@ export default function Employees({ currentUser }) {
                 </select>
                 {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>}
                 {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le rôle de l'administrateur principal est protégé.</p>}
+                {isAdminTarget && !isPrimaryAdmin && !isRequesterPrimaryAdmin && (
+                  <p className="text-xs text-amber-600 mt-1">Seul l'administrateur principal peut modifier le rôle d'un autre administrateur.</p>
+                )}
               </div>
 
               <div>
@@ -572,6 +605,9 @@ export default function Employees({ currentUser }) {
                 </select>
                 {isSelf && <p className="text-xs text-amber-600 mt-1">Vous ne pouvez pas désactiver votre propre compte.</p>}
                 {isPrimaryAdmin && !isSelf && <p className="text-xs text-amber-600 mt-1">Le statut de l'administrateur principal ne peut pas être modifié.</p>}
+                {isAdminTarget && !isPrimaryAdmin && !isRequesterPrimaryAdmin && (
+                  <p className="text-xs text-amber-600 mt-1">Seul l'administrateur principal peut modifier le statut d'un autre administrateur.</p>
+                )}
               </div>
 
               {error && (

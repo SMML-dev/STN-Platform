@@ -102,6 +102,27 @@ router.put('/:id', (req, res) => {
     }
   }
 
+  // Règle : Un administrateur ne peut pas modifier le statut ou le rôle du compte d'un autre administrateur.
+  // Seul l'administrateur principal peut modifier le statut ou le rôle du compte d'un autre administrateur.
+  const isTargetAdmin = targetUser.role === 'admin';
+  const requesterIsPrimaryAdmin = req.user.username === 'admin';
+  if (isTargetAdmin && req.user.id !== targetUser.id) {
+    if (is_active !== undefined && Number(is_active) !== Number(targetUser.is_active)) {
+      if (!requesterIsPrimaryAdmin) {
+        return res.status(403).json({
+          error: "Un administrateur ne peut pas modifier le statut du compte d'un autre administrateur. Seul l'administrateur principal peut modifier le statut du compte d'un autre administrateur."
+        });
+      }
+    }
+    if (role !== undefined && role !== targetUser.role) {
+      if (!requesterIsPrimaryAdmin) {
+        return res.status(403).json({
+          error: "Un administrateur ne peut pas modifier le rôle d'un autre administrateur. Seul l'administrateur principal peut modifier le rôle d'un autre administrateur."
+        });
+      }
+    }
+  }
+
   const newDisplayName = display_name !== undefined ? display_name.trim() : targetUser.display_name;
   const newRole = role !== undefined ? (role === 'admin' ? 'admin' : 'employe') : targetUser.role;
   const newActive = is_active !== undefined ? (is_active ? 1 : 0) : targetUser.is_active;
@@ -128,8 +149,11 @@ router.put('/:id', (req, res) => {
   });
 });
 
-// Réinitialiser le mot de passe d'un employé par l'admin
-// Règle : les administrateurs (role='admin') ne peuvent changer leur mot de passe que dans leurs Paramètres personnels.
+// Réinitialiser le mot de passe d'un compte
+// Règles :
+// 1. L'admin principal (username='admin') ne peut pas voir son mot de passe réinitialisé ici (uniquement dans Paramètres).
+// 2. Pour un autre compte administrateur, SEUL l'administrateur principal peut réinitialiser son mot de passe (en cas d'oubli).
+// 3. Pour un employé standard, tout administrateur peut réinitialiser le mot de passe.
 router.put('/:id/reset-password', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { newPassword } = req.body;
@@ -143,10 +167,17 @@ router.put('/:id/reset-password', (req, res) => {
     return res.status(404).json({ error: 'Utilisateur introuvable' });
   }
 
-  // Bloquer la réinitialisation du mot de passe pour tout compte administrateur
-  if (targetUser.role === 'admin') {
+  // Protéger l'admin principal contre la réinitialisation depuis cette interface
+  if (targetUser.username === 'admin') {
     return res.status(403).json({
-      error: `Le mot de passe d'un compte administrateur ne peut pas être réinitialisé depuis ici. Les administrateurs doivent utiliser la section Paramètres pour changer leur mot de passe.`
+      error: "Le mot de passe de l'administrateur principal ne peut pas être réinitialisé depuis ici. Veuillez utiliser la section Paramètres."
+    });
+  }
+
+  // Pour tout autre administrateur, seul l'admin principal a ce droit
+  if (targetUser.role === 'admin' && req.user.username !== 'admin') {
+    return res.status(403).json({
+      error: "Seul l'administrateur principal peut réinitialiser le mot de passe d'un autre administrateur."
     });
   }
 

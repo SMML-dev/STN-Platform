@@ -4,7 +4,11 @@ const bcrypt = require('bcryptjs');
 
 const db = new Database(path.join(__dirname, 'stn.db'));
 
-db.pragma('journal_mode = WAL');
+// Optimisations pour accès simultanés multi-utilisateurs
+db.pragma('journal_mode = WAL');        // Lecteurs et écrivains ne se bloquent pas
+db.pragma('busy_timeout = 5000');       // Attend jusqu'à 5s en cas d'écriture concurrente au lieu de bloquer
+db.pragma('synchronous = NORMAL');      // Vitesse d'écriture maximale tout en restant fiable
+db.pragma('cache_size = -20000');       // 20 Mo de cache en RAM pour requêtes instantanées
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS purchases (
@@ -361,9 +365,16 @@ if (!usersCols.includes('is_active')) {
   `);
 }
 
-// Mise à jour de l'administrateur avec le rôle 'admin'
+// Index de performance pour fluidifier les accès concurrents
 db.exec(`
-  UPDATE users SET role = 'admin' WHERE username = 'admin' AND (role = 'manager' OR role IS NULL);
+  CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
+  CREATE INDEX IF NOT EXISTS idx_po_items_order ON purchase_order_items(order_id);
+  CREATE INDEX IF NOT EXISTS idx_ro_items_order ON reception_order_items(order_id);
+  CREATE INDEX IF NOT EXISTS idx_po_date ON purchase_orders(order_date);
+  CREATE INDEX IF NOT EXISTS idx_ro_date ON reception_orders(order_date);
+  CREATE INDEX IF NOT EXISTS idx_stocks_family ON stocks(family_id);
+  CREATE INDEX IF NOT EXISTS idx_suppliers_category ON suppliers(category_id);
 `);
 
 module.exports = db;

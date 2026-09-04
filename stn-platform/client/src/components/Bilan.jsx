@@ -4,26 +4,111 @@ import { api } from '../api/client.js';
 import { fmtDate } from '../utils/dateUtils.js';
 import DatePicker from './DatePicker.jsx';
 
+const STORAGE_PERIOD_KEY = 'stn_bilan_period';
+const STORAGE_DATE_FROM_KEY = 'stn_bilan_date_from';
+const STORAGE_DATE_TO_KEY = 'stn_bilan_date_to';
+const VALID_PERIODS = ['daily', 'weekly', 'monthly', 'yearly'];
+
 export default function Bilan() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('monthly');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
 
-  const load = () => {
+  const [period, setPeriod] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PERIOD_KEY);
+      return VALID_PERIODS.includes(saved) ? saved : 'monthly';
+    } catch {
+      return 'monthly';
+    }
+  });
+
+  const [dateFrom, setDateFrom] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_DATE_FROM_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const [dateTo, setDateTo] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_DATE_TO_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const load = (p = period, from = dateFrom, to = dateTo) => {
     setLoading(true);
     const params = {};
-    if (dateFrom && dateTo) {
-      params.date_from = dateFrom;
-      params.date_to = dateTo;
+    if (from && to) {
+      params.date_from = from;
+      params.date_to = to;
     } else {
-      params.period = period;
+      params.period = p;
     }
-    api.bilan.get(params).then(d => { setData(d); setLoading(false); });
+    api.bilan.get(params)
+      .then(d => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load(period, dateFrom, dateTo);
+  }, []);
+
+  const handlePeriodChange = (val) => {
+    setPeriod(val);
+    setDateFrom('');
+    setDateTo('');
+    try {
+      localStorage.setItem(STORAGE_PERIOD_KEY, val);
+      localStorage.removeItem(STORAGE_DATE_FROM_KEY);
+      localStorage.removeItem(STORAGE_DATE_TO_KEY);
+    } catch {}
+    load(val, '', '');
+  };
+
+  const handleDateFromChange = (val) => {
+    setDateFrom(val);
+    try {
+      if (val) {
+        localStorage.setItem(STORAGE_DATE_FROM_KEY, val);
+      } else {
+        localStorage.removeItem(STORAGE_DATE_FROM_KEY);
+      }
+    } catch {}
+    if (val && dateTo) {
+      load(period, val, dateTo);
+    } else if (!val && !dateTo) {
+      load(period, '', '');
+    }
+  };
+
+  const handleDateToChange = (val) => {
+    setDateTo(val);
+    try {
+      if (val) {
+        localStorage.setItem(STORAGE_DATE_TO_KEY, val);
+      } else {
+        localStorage.removeItem(STORAGE_DATE_TO_KEY);
+      }
+    } catch {}
+    if (dateFrom && val) {
+      load(period, dateFrom, val);
+    } else if (!dateFrom && !val) {
+      load(period, '', '');
+    }
+  };
+
+  const handleClearDates = () => {
+    setDateFrom('');
+    setDateTo('');
+    try {
+      localStorage.removeItem(STORAGE_DATE_FROM_KEY);
+      localStorage.removeItem(STORAGE_DATE_TO_KEY);
+    } catch {}
+    load(period, '', '');
+  };
 
   const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
 
@@ -138,7 +223,7 @@ export default function Bilan() {
         <div className="flex flex-wrap items-end gap-4">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Période</label>
-            <select value={period} onChange={e => setPeriod(e.target.value)} className="input-field w-40">
+            <select value={period} onChange={e => handlePeriodChange(e.target.value)} className="input-field w-40">
               <option value="daily">Journalier</option>
               <option value="weekly">Hebdomadaire</option>
               <option value="monthly">Mensuel</option>
@@ -148,13 +233,21 @@ export default function Bilan() {
           <div className="text-sm text-gray-400">— ou —</div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Date début</label>
-            <DatePicker value={dateFrom} onChange={setDateFrom} placeholder="jj/mm/aaaa" className="w-40" />
+            <DatePicker value={dateFrom} onChange={handleDateFromChange} placeholder="jj/mm/aaaa" className="w-40" />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Date fin</label>
-            <DatePicker value={dateTo} onChange={setDateTo} placeholder="jj/mm/aaaa" className="w-40" />
+            <DatePicker value={dateTo} onChange={handleDateToChange} placeholder="jj/mm/aaaa" className="w-40" />
           </div>
-          <button onClick={load} className="btn-primary">Calculer</button>
+          {(dateFrom || dateTo) && (
+            <button
+              type="button"
+              onClick={handleClearDates}
+              className="text-xs text-gray-500 hover:text-red-500 underline self-end pb-2.5 transition-colors"
+            >
+              Effacer les dates
+            </button>
+          )}
         </div>
       </div>
 
